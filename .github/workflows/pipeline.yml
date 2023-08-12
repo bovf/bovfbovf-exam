@@ -32,3 +32,32 @@ jobs:
       run: npm run test:unit
     - name: Echo SoftUni username
       run: echo "bovfbovf"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to production
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.MY_RENDER_API_KEY }}
+          api-key: ${{ secrets.MY_RENDER_SERVICE_ID }}
+  
+  ui_test:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 14.x
+        cache: 'npm'
+
+    - name: Install Dependecies
+      run: npm install
+    - name: Install Playwright
+      run: npx playwright install --with-deps
+    - name: Run UI tests
+      run: npm run test:ui
+
